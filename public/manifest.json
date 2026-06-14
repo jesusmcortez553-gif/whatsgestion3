@@ -1,5 +1,5 @@
 {
-  "name": "What's Gestión",
+  "name": "WhatsGestion",
   "short_name": "WG",
   "description": "Herramienta para gestionar envío de mensajes personalizados a WhatsApp",
   "start_url": "/",
@@ -7,39 +7,20 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#7c3aed",
+  "theme_color": "#1e40af",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/logo-app.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/logo.png",
+      "src": "/logo-app.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/logo.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ],
-  "categories": ["productivity"],
-  "screenshots": [
-    {
-      "src": "/logo.png",
-      "sizes": "540x720",
-      "type": "image/png"
-    }
-  ]
+  "categories": ["productivity"]
 }

@@ -7,6 +7,7 @@ export default function WhatsGestion() {
     template: "Buenas tardes [NOMBRE]🙋🏻‍♂️, te escribe xxxxx, del BCP de la agencia de pichanaqui, el día [FECHA] visitaste la agencia por lo cual te llegó una encuesta a tu gmail📧, si todo estuvo conforme con la atencion te agradeceria nos puedas apoyar ingresando a la encuesta con el numero 10 ✅",
     fecha: '',
     imagen: null,
+    textoImagen: 'Encuesta de satisfacción',
   });
 
   const [sendForm, setSendForm] = useState({
@@ -94,7 +95,7 @@ export default function WhatsGestion() {
       if (navigator.share) {
         await navigator.share({
           title: 'Encuesta',
-          text: 'Encuesta de satisfacción',
+          text: config.textoImagen,
           files: [file]
         });
       } else {
@@ -324,6 +325,22 @@ export default function WhatsGestion() {
                 <img src={config.imagen} alt="Preview" className="w-full rounded-lg border-2 border-slate-300 max-h-60" />
               </div>
             )}
+          </div>
+
+          {/* Texto de la Imagen */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+              <MessageSquare size={18} />
+              Texto que acompaña la imagen
+            </label>
+            <input
+              type="text"
+              value={config.textoImagen}
+              onChange={(e) => setConfig({ ...config, textoImagen: e.target.value })}
+              placeholder="Ej: Encuesta de satisfacción"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:border-blue-600 focus:outline-none text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">Este texto aparecerá cuando compartas la imagen</p>
           </div>
 
           {/* Guardar */}
