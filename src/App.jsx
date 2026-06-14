@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Send, Settings, Upload, Calendar, Eye, EyeOff, User, MessageSquare, Save, Share2 } from 'lucide-react';
+import { ChevronLeft, Send, Settings, Upload, Calendar, Eye, EyeOff, Phone, User, MessageSquare, Save, Share2 } from 'lucide-react';
 
 export default function WhatsGestion() {
   const [activeScreen, setActiveScreen] = useState('send');
   const [config, setConfig] = useState({
-    template: "Buenas tardes [NOMBRE]🙋🏻‍♂️, te escribe xxxx xxxx, del BCP de la agencia de pichanaqui, el día [FECHA] visitaste la agencia por lo cual te llegó una encuesta a tu gmail📧, si todo estuvo conforme con la atencion te agradeceria nos puedas apoyar ingresando a la encuesta con el numero 10 ✅",
+    template: "Buenas tardes [NOMBRE]🙋🏻‍♂️, te escribe xxxxx, del BCP de la agencia de pichanaqui, el día [FECHA] visitaste la agencia por lo cual te llegó una encuesta a tu gmail📧, si todo estuvo conforme con la atencion te agradeceria nos puedas apoyar ingresando a la encuesta con el numero 10 ✅",
     fecha: '',
     imagen: null,
   });
 
   const [sendForm, setSendForm] = useState({
+    celular: '',
     nombre: '',
   });
 
@@ -36,18 +37,16 @@ export default function WhatsGestion() {
     setShowPreview(true);
   };
 
-  const handleImagenUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setConfig({ ...config, imagen: event.target.result });
-      };
-      reader.readAsDataURL(file);
-    }
+  const validarCelular = (cel) => {
+    const clean = cel.replace(/\D/g, '');
+    return clean.length === 9 && clean.startsWith('9');
   };
 
-  const compartirPorWhatsApp = async () => {
+  const enviarWhatsApp = () => {
+    if (!validarCelular(sendForm.celular)) {
+      alert('❌ Número peruano inválido. Debe empezar con 9 (ej: 987654321)');
+      return;
+    }
     if (!sendForm.nombre.trim()) {
       alert('❌ Ingresa el nombre del cliente');
       return;
@@ -61,40 +60,59 @@ export default function WhatsGestion() {
     msg = msg.replace('[NOMBRE]', sendForm.nombre);
     msg = msg.replace('[FECHA]', config.fecha);
 
-    try {
-      if (config.imagen && navigator.share) {
-        // Convertir base64 a blob
-        const base64Data = config.imagen.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' });
-        
-        // Crear archivo
-        const file = new File([blob], 'encuesta.jpg', { type: 'image/jpeg' });
+    const celLimpio = sendForm.celular.replace(/\D/g, '');
+    const url = `https://wa.me/51${celLimpio}?text=${encodeURIComponent(msg)}`;
+    
+    window.open(url, '_blank');
 
-        // Compartir con Web Share API
+    setSendForm({ celular: '', nombre: '' });
+  };
+
+  const compartirImagenPorWhatsApp = async () => {
+    if (!config.imagen) {
+      alert('❌ Primero sube una imagen en Configuración');
+      return;
+    }
+
+    if (!sendForm.celular.trim()) {
+      alert('❌ Ingresa el número del cliente');
+      return;
+    }
+
+    try {
+      // Convertir base64 a blob
+      const base64Data = config.imagen.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      const file = new File([blob], 'encuesta.jpg', { type: 'image/jpeg' });
+
+      if (navigator.share) {
         await navigator.share({
-          title: 'Encuesta BCP',
-          text: msg,
+          title: 'Encuesta',
+          text: 'Encuesta de satisfacción',
           files: [file]
         });
-      } else if (navigator.share) {
-        // Si no hay imagen, solo compartir texto
-        await navigator.share({
-          title: 'Encuesta BCP',
-          text: msg,
-        });
       } else {
-        alert('Tu navegador no soporta compartir. Copia el mensaje manualmente.');
+        alert('Tu navegador no soporta compartir archivos');
       }
-
-      setSendForm({ nombre: '' });
     } catch (error) {
-      console.log('Compartir cancelado o error:', error);
+      console.log('Compartir cancelado:', error);
+    }
+  };
+
+  const handleImagenUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setConfig({ ...config, imagen: event.target.result });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -117,7 +135,7 @@ export default function WhatsGestion() {
       <div className="bg-blue-700 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded" />
+            <img src="/logo.svg" alt="Logo" className="w-8 h-8" />
             <div>
               <h1 className="text-2xl font-bold">What's Gestión</h1>
               <p className="text-blue-100 text-sm">Herramienta de Mensajes</p>
@@ -138,8 +156,25 @@ export default function WhatsGestion() {
           {/* Card Info */}
           <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-600">
             <p className="text-sm text-slate-600">
-              <strong>Recuerda:</strong> Ingresa el nombre, verifica el preview y comparte por WhatsApp.
+              <strong>Recuerda:</strong> Ingresa el número, nombre y verifica el preview antes de enviar.
             </p>
+          </div>
+
+          {/* Número celular */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+              <Phone size={18} />
+              Número celular peruano
+            </label>
+            <input
+              type="tel"
+              placeholder="987654321"
+              value={sendForm.celular}
+              onChange={(e) => setSendForm({ ...sendForm, celular: e.target.value })}
+              maxLength="9"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:border-blue-600 focus:outline-none text-lg"
+            />
+            <p className="text-xs text-slate-500 mt-1">Solo números, empieza con 9</p>
           </div>
 
           {/* Nombre */}
@@ -157,7 +192,7 @@ export default function WhatsGestion() {
             />
           </div>
 
-          {/* Fecha */}
+          {/* Fecha actual (editable) */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
               <Calendar size={18} />
@@ -176,11 +211,6 @@ export default function WhatsGestion() {
                 </option>
               ))}
             </select>
-            {config.fecha && (
-              <div className="mt-3 p-3 bg-green-50 rounded-lg border-2 border-green-300">
-                <p className="text-sm font-semibold text-green-800">✅ {config.fecha}</p>
-              </div>
-            )}
           </div>
 
           {/* Preview */}
@@ -201,22 +231,25 @@ export default function WhatsGestion() {
               <div className="bg-white rounded-lg p-3 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
                 {preview}
               </div>
-              {config.imagen && (
-                <div className="mt-3">
-                  <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Imagen adjunta:</p>
-                  <img src={config.imagen} alt="Encuesta" className="w-full rounded-lg max-h-60" />
-                </div>
-              )}
             </div>
           )}
 
-          {/* Botón Compartir */}
+          {/* Botón Enviar (wa.me) */}
           <button
-            onClick={compartirPorWhatsApp}
+            onClick={enviarWhatsApp}
             className="w-full px-4 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg font-bold text-lg transition shadow-lg flex items-center justify-center gap-2"
           >
+            <Send size={20} />
+            Enviar a WhatsApp
+          </button>
+
+          {/* Botón Compartir Imagen (Web Share API) */}
+          <button
+            onClick={compartirImagenPorWhatsApp}
+            className="w-full px-4 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-bold text-lg transition shadow-lg flex items-center justify-center gap-2"
+          >
             <Share2 size={20} />
-            Compartir por WhatsApp
+            Compartir Imagen por WhatsApp
           </button>
 
           {/* Configurar */}
@@ -248,11 +281,11 @@ export default function WhatsGestion() {
             <p className="text-xs text-slate-500 mt-1">Variables: [NOMBRE] y [FECHA]</p>
           </div>
 
-          {/* Fecha por defecto */}
+          {/* Fecha */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
               <Calendar size={18} />
-              Fecha de atención (por defecto)
+              Selecciona la Fecha de Atención
             </label>
             <select
               value={config.fecha}
@@ -269,7 +302,7 @@ export default function WhatsGestion() {
             </select>
             {config.fecha && (
               <div className="mt-3 p-3 bg-green-50 rounded-lg border-2 border-green-300">
-                <p className="text-sm font-semibold text-green-800">✅ {config.fecha}</p>
+                <p className="text-sm font-semibold text-green-800">✅ Fecha: {config.fecha}</p>
               </div>
             )}
           </div>
