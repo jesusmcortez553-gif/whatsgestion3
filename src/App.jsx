@@ -4,7 +4,7 @@ import { ChevronLeft, Send, Settings, Upload, Calendar, Eye, EyeOff, Phone, User
 export default function WhatsGestion() {
   const [activeScreen, setActiveScreen] = useState('send');
   const [config, setConfig] = useState({
-    template: "Buenas tardes [NOMBRE]🙋🏻‍♂️, te escribe xxxxx, del BCP de la agencia de pichanaqui, el día [FECHA] visitaste la agencia por lo cual te llegó una encuesta a tu gmail📧, si todo estuvo conforme con la atencion te agradeceria nos puedas apoyar ingresando a la encuesta con el numero 10 ✅",
+    template: "Buenas tardes [NOMBRE]🙋🏻‍♂️, te escribe xxxxx, del BCP de la agencia de pichanaqui, el día [FECHA] visitaste la agencia por lo cual le llegó una encuesta a su gmail📧(correo electronico), si todo estuvo conforme con la atencion te agradeceria nos puedas apoyar ingresando a la encuesta con el numero 10 ✅",
     fecha: '',
     imagen: null,
     textoImagen: 'Encuesta de satisfacción',
