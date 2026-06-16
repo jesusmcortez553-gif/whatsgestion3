@@ -75,11 +75,6 @@ export default function WhatsGestion() {
       return;
     }
 
-    if (!sendForm.celular.trim()) {
-      alert('❌ Ingresa el número del cliente');
-      return;
-    }
-
     try {
       // Convertir base64 a blob
       const base64Data = config.imagen.split(',')[1];
